@@ -212,6 +212,43 @@ const resetGame = () => {
     localStorage.getItem(getCompletedKey()) === "true";
 };
 
+/* ---------------- FETCH MEANING ---------------- */
+const fetchMeaning = async (word) => {
+  selectedWord.value = word;
+  selectedMeaning.value = "";
+  showMeaningPopup.value = true;
+  isMeaningLoading.value = true;
+
+  try {
+    const res = await axios.get(
+      `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`
+    );
+
+    const meanings = res.data?.[0]?.meanings || [];
+
+    let output = "";
+
+    meanings.forEach((meaning) => {
+      output += `(${meaning.partOfSpeech})\n`;
+
+      meaning.definitions.forEach((def, index) => {
+        output += `${index + 1}. ${def.definition}\n`;
+      });
+
+      output += "\n";
+    });
+
+    selectedMeaning.value =
+      output || "No meaning found.";
+
+  } catch (err) {
+    selectedMeaning.value =
+      "Meaning not available.";
+  } finally {
+    isMeaningLoading.value = false;
+  }
+};
+
 /* ---------------- FETCH ---------------- */
 const fetchQuestion = async () => {
   const kangarooId = getKangarooId();
